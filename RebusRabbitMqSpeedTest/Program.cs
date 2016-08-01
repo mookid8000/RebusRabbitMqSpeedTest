@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Rebus.Activation;
 using Rebus.Config;
 using Rebus.Logging;
@@ -14,12 +13,35 @@ namespace RebusRabbitMqSpeedTest
 {
     class Program
     {
+        /// <summary>
+        /// UTF8-encoding some JSON wrapping these bad boys will be approx 2 kB
+        /// </summary>
         static readonly string ApproxTwoKbOfData = new string('*', 2048);
+
+        /// <summary>
+        /// Just connect to local RabbitMQ
+        /// </summary>
         const string ConnectionString = "amqp://localhost";
+
+        /// <summary>
+        /// Use this queue. WARNING: It will be PURGED before each run! (IOW you should probably be sure that you are not using a queue with this name)
+        /// </summary>
         const string QueueName = "speedtest";
+
+        /// <summary>
+        /// How many messages to send/receive
+        /// </summary>
         const int NumberOfMessages = 10000;
 
+        /// <summary>
+        /// How many threads to use while sending
+        /// </summary>
         const int SendParallelism = 20;
+
+        /// <summary>
+        /// How many threads to use while receiving
+        /// </summary>
+        const int ReceiveParallelism = 20;
 
         static void Main()
         {
@@ -34,7 +56,7 @@ namespace RebusRabbitMqSpeedTest
             {
                 var allMessagesReceived = new ManualResetEvent(false);
                 var receivedMessages = 0;
-                activator.Handle<string>(async str =>
+                activator.Handle<MessageWithString>(async message =>
                 {
                     var newValue = Interlocked.Increment(ref receivedMessages);
 
@@ -55,8 +77,8 @@ namespace RebusRabbitMqSpeedTest
                     })
                     .Options(o =>
                     {
-                        o.SetNumberOfWorkers(0);
-                        o.SetMaxParallelism(20);
+                        o.SetNumberOfWorkers(0); //< don't receive anything yet
+                        o.SetMaxParallelism(ReceiveParallelism);
                     })
                     .Start();
 
@@ -68,13 +90,13 @@ namespace RebusRabbitMqSpeedTest
 
                 TakeTime("Sending messages", NumberOfMessages, () =>
                 {
-                    var messagesToSend = Enumerable.Repeat(ApproxTwoKbOfData, NumberOfMessages);
-                    var queue = new ConcurrentQueue<string>(messagesToSend);
+                    var messagesToSend = Enumerable.Repeat(new MessageWithString(ApproxTwoKbOfData), NumberOfMessages);
+                    var queue = new ConcurrentQueue<MessageWithString>(messagesToSend);
 
                     var sendThreads = Enumerable.Range(0, SendParallelism)
                         .Select(_ => new Thread(() =>
                         {
-                            string nextMessage;
+                            MessageWithString nextMessage;
                             while (queue.TryDequeue(out nextMessage))
                             {
                                 bus.SendLocal(nextMessage).Wait();
@@ -84,17 +106,11 @@ namespace RebusRabbitMqSpeedTest
 
                     sendThreads.ForEach(t => t.Start());
                     sendThreads.ForEach(t => t.Join());
-
-                    //Task.Run(async () =>
-                    //{
-                    //    await Task.WhenAll(Enumerable.Range(0, NumberOfMessages)
-                    //        .Select(i => bus.SendLocal(ApproxTwoKbOfData)));
-                    //}).Wait();
                 });
 
                 TakeTime("Received messages", NumberOfMessages, () =>
                 {
-                    bus.Advanced.Workers.SetNumberOfWorkers(20);
+                    bus.Advanced.Workers.SetNumberOfWorkers(ReceiveParallelism);
 
                     allMessagesReceived.WaitOne();
                 });
@@ -128,6 +144,16 @@ namespace RebusRabbitMqSpeedTest
         {
             Console.WriteLine("Press ENTER to continue...");
             Console.ReadLine();
+        }
+
+        class MessageWithString
+        {
+            public string Text { get; }
+
+            public MessageWithString(string text)
+            {
+                Text = text;
+            }
         }
     }
 }
