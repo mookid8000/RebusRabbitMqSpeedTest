@@ -2,11 +2,11 @@
 
 Performs the following sequence of operations:
 
-1 Start Rebus endpoint with 0 workers (i.e. it does not receive anything)
-1 Start create `ConcurrentQueue` of messages to be sent
-1 Start a number of threads and measure time spent sending messages (`'Sending messages'` action)
-1 Start a number of workers (i.e. start receiving messages)
-1 Measure time spent waiting for all messages to be received (`'Receive messages'` action)
+1. Start Rebus endpoint with 0 workers (i.e. it does not receive anything)
+1. Start create `ConcurrentQueue` of messages to be sent
+1. Start a number of threads and measure time spent sending messages (`'Sending messages'` action)
+1. Start a number of workers (i.e. start receiving messages)
+1. Measure time spent waiting for all messages to be received (`'Receive messages'` action)
 
 # Results
 
