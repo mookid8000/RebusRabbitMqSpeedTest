@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Rebus.RabbitMq</name>
+    </assembly>
+    <members>
+        <member name="T:Rebus.RabbitMq.RabbitMqConfigurationExtensions">
+            <summary>
+            Configuration extensions for the RabbitMQ transport
+            </summary>
+        </member>
+        <member name="M:Rebus.RabbitMq.RabbitMqConfigurationExtensions.UseRabbitMqAsOneWayClient(Rebus.Config.StandardConfigurer{Rebus.Transport.ITransport},System.String)">
+            <summary>
+            Configures Rebus to use RabbitMQ to transport messages as a one-way client (i.e. will not be able to receive any messages)
+            </summary>
+        </member>
+        <member name="M:Rebus.RabbitMq.RabbitMqConfigurationExtensions.UseRabbitMq(Rebus.Config.StandardConfigurer{Rebus.Transport.ITransport},System.String,System.String)">
+            <summary>
+            Configures Rebus to use RabbitMQ to move messages around
+            </summary>
+        </member>
+        <member name="T:Rebus.RabbitMq.RabbitMqOptionsBuilder">
+            <summary>
+            Allows for fluently configuring RabbitMQ options
+            </summary>
+        </member>
+        <member name="F:Rebus.RabbitMq.RabbitMqOptionsBuilder.DefaultDirectExchangeName">
+            <summary>
+            Default name of the exchange of type DIRECT (used for point-to-point messaging)
+            </summary>
+        </member>
+        <member name="F:Rebus.RabbitMq.RabbitMqOptionsBuilder.DefaultTopicExchangeName">
+            <summary>
+            Default name of the exchange of type TOPIC (used for pub-sub)
+            </summary>
+        </member>
+        <member name="M:Rebus.RabbitMq.RabbitMqOptionsBuilder.Declarations(System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            Configures which things to auto-declare and whether to bind the input queue. 
+            Please note that you must be careful when you skip e.g. binding of the input queue as it may lead to lost messages
+            if the direct binding is not established. 
+            By default, two exchanges will be declared: one of the DIRECT type (for point-to-point messaging) and one of the
+            TOPIC type (for pub-sub). Moreover, the endpoint's input queue will be declared, and a binding
+            will be made from a topic of the same name as the input queue in the DIRECT exchange.
+            </summary>
+        </member>
+        <member name="M:Rebus.RabbitMq.RabbitMqOptionsBuilder.Prefetch(System.Int32)">
+            <summary>
+            Sets max number of messages to prefetch
+            </summary>
+        </member>
+        <member name="M:Rebus.RabbitMq.RabbitMqOptionsBuilder.ExchangeNames(System.String,System.String)">
+            <summary>
+            Configures which names to use for the two types of necessary exchanges
+            </summary>
+        </member>
+        <member name="M:Rebus.RabbitMq.RabbitMqOptionsBuilder.AddClientProperties(System.Collections.Generic.IDictionary{System.String,System.String})">
+            <summary>
+            Adds the given custom properties to be added to the RabbitMQ client connection when it is established
+            </summary>
+        </member>
+        <member name="T:Rebus.RabbitMq.RabbitMqTransport">
+            <summary>
+            Implementation of <see cref="T:Rebus.Transport.ITransport"/> that uses RabbitMQ to send/receive messages
+            </summary>
+        </member>
+        <member name="M:Rebus.RabbitMq.RabbitMqTransport.#ctor(System.String,System.String,Rebus.Logging.IRebusLoggerFactory,System.UInt16)">
+            <summary>
+            Constructs the transport with a connection to the RabbitMQ instance specified by the given connection string
+            </summary>
+        </member>
+        <member name="M:Rebus.RabbitMq.RabbitMqTransport.AddClientProperties(System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            Stores the client properties to be haded to RabbitMQ when the connection is established
+            </summary>
+        </member>
+        <member name="M:Rebus.RabbitMq.RabbitMqTransport.PurgeInputQueue">
+            <summary>
+            Deletes all messages from the queue
+            </summary>
+        </member>
+        <member name="M:Rebus.RabbitMq.RabbitMqTransport.CreateTransportMessage(RabbitMQ.Client.Events.BasicDeliverEventArgs)">
+            <summary>
+            Creates the transport message.
+            </summary>
+            <param name="result">The <see cref="T:RabbitMQ.Client.Events.BasicDeliverEventArgs"/> instance containing the event data.</param>
+            <returns>the TransportMessage</returns>
+        </member>
+        <member name="M:Rebus.RabbitMq.RabbitMqTransport.InitializeConsumer">
+            <summary>
+            Creates the consumer.
+            </summary>
+        </member>
+    </members>
+</doc>
