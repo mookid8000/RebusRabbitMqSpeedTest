@@ -108,7 +108,7 @@ namespace RebusRabbitMqSpeedTest
                     sendThreads.ForEach(t => t.Join());
                 });
 
-                TakeTime("Received messages", NumberOfMessages, () =>
+                TakeTime("Receive messages", NumberOfMessages, () =>
                 {
                     bus.Advanced.Workers.SetNumberOfWorkers(ReceiveParallelism);
 
